@@ -1,17 +1,36 @@
-from keras.layers import Conv2D, Dense, Flatten, Reshape
-from keras.models import Sequential
-from keras.optimizers import Adam
+from keras import layers, models, optimizers
+
+MAXLEN = 128
+CHARS = 1000
+HIDDEN_DIM = 128
 
 
-def build():
-    model = Sequential()
-    model.add(Reshape((28, 28, 1), input_shape=(28, 28)))
-    model.add(Conv2D(8, (5, 5), strides=(2, 2), activation='relu'))
-    model.add(Conv2D(16, (5, 5), strides=(2, 2), activation='relu'))
-    model.add(Flatten())
-    model.add(Dense(10, activation='softmax'))
+def make_encoder() -> models.Sequential:
+    model = models.Sequential(name='encoder')
+    model.add(layers.TimeDistributed(layers.Dense(HIDDEN_DIM)))
+    model.add(layers.LSTM(HIDDEN_DIM, return_sequences=True, input_shape=(MAXLEN, CHARS)))
+    model.add(layers.LSTM(HIDDEN_DIM, return_sequences=False))
+    model.summary()
+    return model
 
-    opt = Adam(clipvalue=1.0)
+
+def make_decoder() -> models.Sequential:
+    model = models.Sequential(name='decoder')
+    model.add(layers.RepeatVector(MAXLEN, input_shape=(32,)))
+    model.add(layers.LSTM(128, return_sequences=True))
+    model.add(layers.TimeDistributed(layers.Dense(CHARS)))
+    model.add(layers.Activation('softmax'))
+    model.summary()
+    return model
+
+
+def make_encoder_decoder() -> models.Sequential:
+    model = models.Sequential(name='encoder_decoder')
+    model.add(make_encoder())
+    model.add(make_decoder())
+    model.summary()
+
+    opt = optimizers.Adam(clipvalue=1.0)
     model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
 
     return model

@@ -14,6 +14,9 @@ test:
 log:
 		visplot --smoothing 2 -x epoch -y acc,val_acc $(shell ls -1 logs/*.json)
 
+lint:
+	mypy --ignore-missing-imports .
+
 .DEFAULT_GOAL := help
 
 ## shows this
