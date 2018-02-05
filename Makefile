@@ -1,18 +1,10 @@
 ## training mode (newly)
 train:
-	CUDA_VISIBLE_DEVICES=$(shell empty-gpu-device) python bot.py train --name $(shell date "+%Y-%m-%d-%s")
+	CUDA_VISIBLE_DEVICES=$(shell empty-gpu-device) python bot.py train_autoencoder --name $(shell date "+%Y-%m-%d-%s")
 
 ## training mode (resume from a snapshot)
 train-from:
 	CUDA_VISIBLE_DEVICES=$(shell empty-gpu-device) python bot.py train --name $(shell date "+%Y-%m-%d-%s") --resume $(shell ls -1 snapshots/*.h5|peco)
-
-## testing mode
-test:
-	CUDA_VISIBLE_DEVICES=$(shell empty-gpu-device) python bot.py test $(shell ls -1 snapshots/*.h5|peco)
-
-## visplot a log
-log:
-		visplot --smoothing 2 -x epoch -y acc,val_acc $(shell ls -1 logs/*.json)
 
 lint:
 	mypy --ignore-missing-imports .

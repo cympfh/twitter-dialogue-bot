@@ -23,11 +23,11 @@ def main():
 @click.option('--batch-size', type=int, default=32)
 @click.option('--epochs', type=int, default=5)
 @click.option('--verbose', type=int, default=1)
-def train(name, resume, batch_size, epochs, verbose):
+def train_autoencoder(name, resume, batch_size, epochs, verbose):
 
     # paths
-    log_path = "logs/{}.json".format(name)
-    out_path = "snapshots/" + name + ".{epoch:06d}.h5"
+    log_path = "logs/ae.{}.json".format(name)
+    out_path = "snapshots/ae." + name + ".{epoch:06d}.h5"
     echo('log path', log_path)
     echo('out path', out_path)
 
@@ -40,11 +40,14 @@ def train(name, resume, batch_size, epochs, verbose):
 
     # dataset
     echo('dataset loading...')
-    seq_train, seq_valid = dataset.batch_generator(batch_size)
+    seq_train, seq_valid = dataset.load_tweets(batch_size)
+
+    Model.CHARS = len(seq_train.chars)
+    Model.MAXLEN = dataset.MAXLEN
 
     # model building
     echo('model building...')
-    model = Model.build()
+    model = Model.make_encoder_decoder()
     model.summary()
     if resume:
         echo('Resume Learning from {}'.format(resume))
